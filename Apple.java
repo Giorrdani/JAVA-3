@@ -1,5 +1,12 @@
 class Apple extends Fruit {
 
-    public float weight  = 1.0f;
+    public Apple (){
+        setWeight(1.0);
+    }
 
+
+    @Override
+    public String toString() {
+        return super.toString() + ": i am apple";
+    }
 }
