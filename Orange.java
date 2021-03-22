@@ -1,10 +1,13 @@
 class Orange extends Fruit {
 
-    public float getWeight() {
-        return weight;
+    public Orange(){
+        setWeight(1.5);
     }
 
-    public float weight = 1.5f;
 
+    @Override
+    public String toString() {
+        return super.toString() + ": i am orange";
+    }
 
 }
