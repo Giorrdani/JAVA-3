@@ -1,7 +1,4 @@
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class Main {
@@ -22,7 +19,19 @@ public class Main {
         Orange orange2 = new Orange();
         Orange orange3 = new Orange();
         Orange orange4 = new Orange();
+
+        Box boxForApple = new Box();
+        boxForApple.put(apple1,apple2,apple3,apple4,apple5,apple6);
+
+        Box boxForOrange = new Box();
+        boxForOrange.put(orange1,orange2,orange3,orange4);
+
+        System.out.println(boxForApple.getWeight());
+        System.out.println(boxForOrange.getWeight());
+
+        System.out.println(boxForApple.compare(boxForOrange));
     }
+
 
     //№1
     public static <T> void replace (T [] arr, int ind1, int ind2) {

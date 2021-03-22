@@ -3,11 +3,8 @@ import java.util.Arrays;
 import java.util.List;
 
 class Box <T extends Fruit> {
-    private final List <T> fruitList;
+    private final List <T> fruitList = new ArrayList<>();;
 
-    public Box(){
-        fruitList = new ArrayList<>();
-    }
 
     private List<T> getFruitList(){
         return fruitList;
