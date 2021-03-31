@@ -48,8 +48,8 @@ public class MyServer {
     public void sendMessageToOneClient (ClientHandler clientHandler, String nick, String message) {
         for(ClientHandler c : clientsList){
             if (c.getName().equalsIgnoreCase(nick)){
-                c.sendMessage("PM from " + clientHandler.getName() + ": " + message);
-                clientHandler.sendMessage("PM for " + nick + ": " + message);
+                c.sendMessage("PM from " + clientHandler.getName().toUpperCase() + ": " + message);
+                clientHandler.sendMessage("PM for " + nick.toUpperCase() + ": " + message);
             }
         }
     }

@@ -88,14 +88,14 @@ public class ClientHandler {
             if (messageFromClient.startsWith("/")) {
                 if (messageFromClient.startsWith("/w")) {
                     String[] arr = messageFromClient.split("\\s", 3);
-                    myServer.sendMessageToOneClient(this, arr[1], arr[2]);
+                    myServer.sendMessageToOneClient(this, arr[1].toUpperCase(), arr[2]);
                     continue;
                 }
                 if (messageFromClient.startsWith("/en")) {
                     String[] arr = messageFromClient.split("\\s", 2);
                     String oldName = name;
                     myServer.editNick(this, arr[1]);
-                    myServer.sendMessageToClients("User " + oldName + " edit nickname on " + arr[1].toLowerCase());
+                    myServer.sendMessageToClients("User " + oldName.toUpperCase() + " edit nickname on " + arr[1].toUpperCase());
                     continue;
                 }
             }

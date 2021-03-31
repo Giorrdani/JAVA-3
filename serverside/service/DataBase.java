@@ -60,7 +60,6 @@ public class DataBase {
                 String password = resultSet.getString("password");
                 String nick = resultSet.getString("nick");
                 userList.add(new User(login, password, nick));
-//                System.out.println(login + " " + password + " " + nick);
             }
 
 
