@@ -1,19 +1,26 @@
 package clientside.one;
 
+
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import java.util.*;
+import java.util.List;
 
 public class EchoClient extends JFrame {
 
     public static void main(String[] args) {
+
         SwingUtilities.invokeLater(() -> {
-            new EchoClient();
+            try {
+                new EchoClient();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         });
     }
 
@@ -21,7 +28,7 @@ public class EchoClient extends JFrame {
     private final static int SERVER_PORT = 8081;
 
     private JTextField msgInputField;
-    private JTextArea chatArea;
+    private static JTextArea chatArea;
 
     private Socket socket;
     private DataInputStream dis;
@@ -30,17 +37,13 @@ public class EchoClient extends JFrame {
 
     private boolean isAuthorized;
 
-    public EchoClient() {
+    public EchoClient() throws FileNotFoundException {
         try {
             connection();
         } catch (IOException ignored) {
             ignored.printStackTrace();
         }
         prepareGUI();
-    }
-
-    public boolean isAuthorized() {
-        return isAuthorized;
     }
 
     public void setAuthorized(boolean authorized) {
@@ -57,7 +60,7 @@ public class EchoClient extends JFrame {
                 new Thread(() -> {
                     long timeMillis = System.currentTimeMillis();
                     while (timer) {
-                        if (System.currentTimeMillis() - timeMillis >= 10000 && isAuthorized == false) {
+                        if (System.currentTimeMillis() - timeMillis >= 120000 && !isAuthorized) {
                             System.out.println("Time authorized is end");
                             closeConnection();
                             timer = false;
@@ -70,11 +73,14 @@ public class EchoClient extends JFrame {
                         String serverMessage = dis.readUTF();
                         if (serverMessage.startsWith("/auth ok - ")) {
                             setAuthorized(true);
+                            showCash();
                             chatArea.append(serverMessage + "\n");
                             break;
                         }
                         chatArea.append(serverMessage + "\n");
                     } catch (IOException ignored) {
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
                     }
                 }
                 while (true) {
@@ -84,10 +90,12 @@ public class EchoClient extends JFrame {
                     }
                     chatArea.append(serverMessage + "\n");
                 }
+
             } catch (IOException ignored) {
                 ignored.printStackTrace();
             }
             closeConnection();
+
         });
         thread.start();
     }
@@ -99,7 +107,57 @@ public class EchoClient extends JFrame {
                 dos.writeUTF(messageToServer);
                 msgInputField.setText("");
             } catch (IOException ignored) {
+
             }
+        }
+    }
+
+    public static void cashChat() throws BadLocationException, IOException {
+        List<String> list = new ArrayList<>();
+        String s = chatArea.getText();
+        String [] asd = s.split("\n");
+        for (String a : asd){
+            list.add(a);
+        }
+        System.out.println(list.size());
+
+        if (list.size()>10){
+            list = list.subList(10, list.size());
+        }else {
+            list.subList(0,list.size());
+        }
+        String joined = String.join("\n", list);
+        try (FileWriter fileWriter = new FileWriter("src\\liveCash.txt",true)) {
+            fileWriter.write(joined + "\n");
+        }
+
+        /*String str = chatArea.getText();
+        try {
+            FileOutputStream outputStream = new FileOutputStream("src\\liveCash.txt", true);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+            Cash cash = new Cash(str);
+            objectOutputStream.writeObject(cash);
+            objectOutputStream.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+    }
+
+    public void showCash () throws IOException, ClassNotFoundException {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src\\liveCash.txt"))) {
+            String s;
+            List <String> str = new ArrayList<>();
+            while ((s = reader.readLine()) !=null) {
+            str.add(s);
+            }
+            if (str.size()> 10){
+                str = str.subList(str.size() - 10, str.size());
+            }else {
+                str = str.subList(0, str.size()-1);
+            }
+            String joined = String.join("\n", str);
+            chatArea.append(joined + "\n");
         }
     }
 
@@ -143,6 +201,9 @@ public class EchoClient extends JFrame {
                 super.windowClosing(e);
                 try {
                     dos.writeUTF("/q");
+                    cashChat();
+                } catch (BadLocationException badLocationException) {
+                        badLocationException.printStackTrace();
                 } catch (IOException ignored) {
                 }
             }
@@ -151,7 +212,7 @@ public class EchoClient extends JFrame {
         setVisible(true);
     }
 
-        private void closeConnection() {
+    private void closeConnection() {
         try {
             dos.flush();
         } catch (IOException ignored) {
@@ -173,3 +234,6 @@ public class EchoClient extends JFrame {
         }
     }
 }
+
+
+

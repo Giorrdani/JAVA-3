@@ -13,7 +13,7 @@ public class ClientHandler {
     private Socket socket;
     private DataInputStream dis;
     private DataOutputStream dos;
-    private EchoClient client;
+
 
     private String name;
 
@@ -77,27 +77,34 @@ public class ClientHandler {
         return name;
     }
 
+    public String editName(String n) {
+        this.name = n;
+        return name;
+    }
+
     private void readMessage() throws IOException {
         while (true) {
             String messageFromClient = dis.readUTF();
+            if (messageFromClient.startsWith("/")) {
                 if (messageFromClient.startsWith("/w")) {
                     String[] arr = messageFromClient.split("\\s", 3);
                     myServer.sendMessageToOneClient(this, arr[1], arr[2]);
                     continue;
                 }
-
-                if (messageFromClient.equals("/q")) {
-                    sendMessage(messageFromClient);
-                    return;
+                if (messageFromClient.startsWith("/en")) {
+                    String[] arr = messageFromClient.split("\\s", 2);
+                    String oldName = name;
+                    myServer.editNick(this, arr[1]);
+                    myServer.sendMessageToClients("User " + oldName + " edit nickname on " + arr[1].toLowerCase());
+                    continue;
                 }
+            }
             myServer.sendMessageToClients(name + ": " + messageFromClient);
         }
     }
+        private void closeConnection () {
 
-    private void closeConnection() {
-        myServer.unSubscribe(this);
-        //if (client.isAuthorized() != false) {
-        myServer.sendMessageToClients(name + " leave chat");
-        //}
+            myServer.unSubscribe(this);
+            myServer.sendMessageToClients(name + " leave chat");
         }
-}
+    }

@@ -63,15 +63,16 @@ public class MyServer {
     }
 
     public synchronized boolean isNickBusy(String nick) {
-        /*for (ClientHandler c : clientsList) {
-            if (c.getName().equals(nick)) {
-                return true;
-            }
-        }
-        return false;*/
         return clientsList.stream()
                 .anyMatch(a -> a.getName().equals(nick));
     }
 
+    public synchronized void editNick(ClientHandler c, String newNick){
+        for (ClientHandler x : clientsList){
+            if (x.getName().equals(c.getName())){
+                x.editName(newNick);
+            }
+        }
+    }
 
 }
