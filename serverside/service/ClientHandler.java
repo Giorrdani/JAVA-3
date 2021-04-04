@@ -4,7 +4,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,6 +43,7 @@ public class ClientHandler {
                     }
                 }
             });
+            executorService.shutdown();
 
         } catch (IOException e) {
             System.out.println("Server problem");

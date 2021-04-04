@@ -103,6 +103,7 @@ public class EchoClient extends JFrame {
                 closeConnection();
             }
         });
+        executorService.shut
         /*Thread thread = new Thread(() -> {
             System.out.println(getState());
             try {
