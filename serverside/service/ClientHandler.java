@@ -1,11 +1,12 @@
 package serverside.service;
 
-import clientside.one.EchoClient;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ClientHandler {
 
@@ -16,6 +17,7 @@ public class ClientHandler {
 
 
     private String name;
+    ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     public ClientHandler(MyServer myServer, Socket socket) {
         try {
@@ -25,17 +27,24 @@ public class ClientHandler {
             this.dos = new DataOutputStream(socket.getOutputStream());
             this.name = "";
 
-            new Thread(() -> {
-                try {
-                    authentication();
-                    readMessage();
-                } catch (IOException e) {
-                    System.out.println(e.getMessage());
-                } finally {
-                    closeConnection();
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        authentication();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        readMessage();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }finally {
+                        closeConnection();
+                    }
                 }
+            });
 
-            }).start();
         } catch (IOException e) {
             System.out.println("Server problem");
         }

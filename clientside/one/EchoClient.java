@@ -10,6 +10,8 @@ import java.io.*;
 import java.net.Socket;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class EchoClient extends JFrame {
 
@@ -45,6 +47,7 @@ public class EchoClient extends JFrame {
         }
         prepareGUI();
     }
+    ExecutorService executorService = Executors.newFixedThreadPool(1);
 
     public void setAuthorized(boolean authorized) {
         isAuthorized = authorized;
@@ -55,7 +58,53 @@ public class EchoClient extends JFrame {
         dis = new DataInputStream(socket.getInputStream());
         dos = new DataOutputStream(socket.getOutputStream());
         setAuthorized(false);
-        Thread thread = new Thread(() -> {
+
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    new Thread(() -> {
+                        long timeMillis = System.currentTimeMillis();
+                        while (timer) {
+                            if (System.currentTimeMillis() - timeMillis >= 120000 && !isAuthorized) {
+                                System.out.println("Time authorized is end");
+                                closeConnection();
+                                timer = false;
+                                break;
+                            }
+                        }
+                    }).start();
+                    while (true) {
+                        try {
+                            String serverMessage = dis.readUTF();
+                            if (serverMessage.startsWith("/auth ok - ")) {
+                                setAuthorized(true);
+                                showCash();
+                                chatArea.append(serverMessage + "\n");
+                                break;
+                            }
+                            chatArea.append(serverMessage + "\n");
+                        } catch (IOException ignored) {
+                        } catch (ClassNotFoundException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    while (true) {
+                        String serverMessage = dis.readUTF();
+                        if (serverMessage.equals("/q")) {
+                            break;
+                        }
+                        chatArea.append(serverMessage + "\n");
+                    }
+
+                } catch (IOException ignored) {
+                    ignored.printStackTrace();
+                }
+                closeConnection();
+            }
+        });
+        /*Thread thread = new Thread(() -> {
+            System.out.println(getState());
             try {
                 new Thread(() -> {
                     long timeMillis = System.currentTimeMillis();
@@ -97,9 +146,10 @@ public class EchoClient extends JFrame {
             closeConnection();
 
         });
-        thread.start();
-    }
 
+        thread.start();
+    }*/
+    }
     private void sendMessageToServer() {
         if (!msgInputField.getText().trim().isEmpty()) {
             try {
@@ -119,7 +169,6 @@ public class EchoClient extends JFrame {
         for (String a : asd){
             list.add(a);
         }
-        System.out.println(list.size());
 
         if (list.size()>10){
             list = list.subList(10, list.size());
@@ -130,18 +179,6 @@ public class EchoClient extends JFrame {
         try (FileWriter fileWriter = new FileWriter("src\\liveCash.txt",true)) {
             fileWriter.write(joined + "\n");
         }
-
-        /*String str = chatArea.getText();
-        try {
-            FileOutputStream outputStream = new FileOutputStream("src\\liveCash.txt", true);
-            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
-            Cash cash = new Cash(str);
-            objectOutputStream.writeObject(cash);
-            objectOutputStream.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
     }
 
     public void showCash () throws IOException, ClassNotFoundException {
@@ -234,6 +271,7 @@ public class EchoClient extends JFrame {
         }
     }
 }
+
 
 
 
